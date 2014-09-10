@@ -177,6 +177,49 @@
 	self.webView.hidden = NO;
 }
 
+NSString* urlEncode(NSString* s) {
+    NSMutableString *output = [NSMutableString string];
+    const unsigned char *source = (const unsigned char *)[s UTF8String];
+    int sourceLen = strlen((const char *)source);
+    for (int i = 0; i < sourceLen; ++i) {
+        const unsigned char thisChar = source[i];
+        if (thisChar == ' '){
+            [output appendString:@"+"];
+        } else if (thisChar == '.' || thisChar == '-' || thisChar == '_' || thisChar == '~' ||
+                   (thisChar >= 'a' && thisChar <= 'z') ||
+                   (thisChar >= 'A' && thisChar <= 'Z') ||
+                   (thisChar >= '0' && thisChar <= '9')) {
+            [output appendFormat:@"%c", thisChar];
+        } else {
+            [output appendFormat:@"%%%02X", thisChar];
+        }
+    }
+    return output;
+}
+
+- (void)loadURL:(NSString *)url method:(NSString*)method with:(NSDictionary*)data {
+	NSLog(@"Opening Url : %@",url);
+    imageURL = @"";
+    isImage = NO;
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setHTTPMethod:method];
+    
+    if(data!=nil) {
+        [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"content-type"];
+        
+        NSMutableArray *parts = [NSMutableArray array];
+        for (id key in data) {
+            id value = [data objectForKey: key];
+            NSString *part = [NSString stringWithFormat: @"%@=%@", urlEncode(key), urlEncode(value)];
+            [parts addObject: part];
+        }
+        NSString *myRequestString =  [parts componentsJoinedByString: @"&"];
+        NSData *myRequestData = [NSData dataWithBytes: [myRequestString UTF8String ] length: [ myRequestString length ]];
+        [request setHTTPBody: myRequestData];
+    }
+    [self.webView loadRequest:request];
+	self.webView.hidden = NO;
+}
 
 - (void)webViewDidStartLoad:(UIWebView *)sender {
 	self.addressLabel.text = @"Loading...";

@@ -43,7 +43,27 @@
     NSString* url = (NSString*) [command.arguments objectAtIndex:0];
     
     [self.childBrowser resetControls];
-    [self.childBrowser loadURL:url];
+    
+    NSString* requestMethd=@"GET";
+    NSDictionary* requestData=nil;
+    if([options objectForKey:@"request"]!=nil) {
+        NSDictionary* request=[options objectForKey:@"request"];
+        if([request objectForKey:@"method"]!=nil)
+            requestMethd=[[request objectForKey:@"method"] stringValue];
+
+        if([request objectForKey:@"data"]!=nil)
+            requestData=[request objectForKey:@"data"];
+    }
+    
+    if([requestMethd caseInsensitiveCompare:@"GET"] == NSOrderedSame) {
+        [self.childBrowser loadURL:url];
+    }else {
+        [self.childBrowser loadURL:url method:requestMethd with:requestData];
+    }
+
+    
+    
+    
     if([options objectForKey:@"showAddress"]!=nil)
         [childBrowser showAddress:[[options objectForKey:@"showAddress"] boolValue]];
     if([options objectForKey:@"showLocationBar"]!=nil)

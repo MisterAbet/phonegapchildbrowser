@@ -53,6 +53,7 @@
 - (IBAction)onDoneButtonPress:(id)sender;
 - (IBAction)onSafariButtonPress:(id)sender;
 - (void)loadURL:(NSString*)url;
+- (void)loadURL:(NSString *)url method:(NSString*)method with:(NSDictionary*)data;
 - (void)closeBrowser;
 
 //Disaplying Controls
