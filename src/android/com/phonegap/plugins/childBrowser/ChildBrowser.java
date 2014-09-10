@@ -10,6 +10,8 @@ package com.phonegap.plugins.childBrowser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,11 +42,13 @@ import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.PluginResult;
 import org.apache.cordova.CallbackContext;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.util.EncodingUtils;
 
 public class ChildBrowser extends CordovaPlugin {
 
     protected static final String LOG_TAG = "ChildBrowser";
-    private static int CLOSE_EVENT = 0;
+	private static int CLOSE_EVENT = 0;
     private static int LOCATION_CHANGED_EVENT = 1;
     private static int OPEN_EXTERNAL_EVENT = 2;
     private static int BROWSER_OPENED = 3;
@@ -58,6 +62,9 @@ public class ChildBrowser extends CordovaPlugin {
     private boolean showAddress = true;
     private boolean showNavigationBar = true;
 
+    private String requestMethod="GET";
+	private JSONObject requestData=null;
+    
     /**
      * Executes the request and returns boolean.
      *
@@ -213,6 +220,14 @@ public class ChildBrowser extends CordovaPlugin {
             showLocationBar = options.optBoolean("showLocationBar", true);
             showNavigationBar = options.optBoolean("showNavigationBar", true);
             showAddress = options.optBoolean("showAddress", true);
+            JSONObject request = options.optJSONObject("request");
+            if(request==null) {
+            	requestMethod="GET";
+            	requestData=null;
+            }else {
+            	requestMethod = request.optString("method","GET").toUpperCase();
+            	requestData = request.optJSONObject("data");
+            }
         }
 
         // Create dialog in new thread
@@ -317,7 +332,29 @@ public class ChildBrowser extends CordovaPlugin {
                 webview.getSettings().setBuiltInZoomControls(true);
                 WebViewClient client = new ChildBrowserClient(cordova, edittext);
                 webview.setWebViewClient(client);
-                webview.loadUrl(url);
+                if(requestMethod.equalsIgnoreCase("GET"))
+                	webview.loadUrl(url);
+                else if(requestMethod.equalsIgnoreCase("POST")) {
+                	byte[] postData=EncodingUtils.getBytes("", "UTF-8");
+                	if(requestData!=null) {
+                		StringBuilder pdb=new StringBuilder();
+                		Iterator<String> keys=requestData.keys();
+                		while(keys.hasNext())
+                		{
+                			String key=keys.next();
+							String value=requestData.optString(key,"");
+							try {
+								pdb.append(String.format("%s=%s&", key,URLEncoder.encode(value, "UTF-8")));
+							}
+							catch(java.io.UnsupportedEncodingException e) {
+							// TODO: do something
+							}
+						}
+                		postData=EncodingUtils.getBytes(pdb.toString(), "UTF-8");
+                	}
+                	webview.postUrl(url, postData);
+                }
+                	
                 webview.setId(5);
                 webview.setInitialScale(0);
                 webview.setLayoutParams(wvParams);
@@ -363,6 +400,8 @@ public class ChildBrowser extends CordovaPlugin {
         return "";
     }
 
+	
+	
     /**
      * Create a new plugin result and send it back to JavaScript
      *
@@ -417,6 +456,9 @@ public class ChildBrowser extends CordovaPlugin {
                 edittext.setText(newloc);
             }
 
+			// if(newloc.contains("paymentOk") || newloc.contains("paymentCancel"))
+				Log.d("ChildBrowser",newloc);
+				
             try {
                 JSONObject obj = new JSONObject();
                 obj.put("type", LOCATION_CHANGED_EVENT);
@@ -427,5 +469,7 @@ public class ChildBrowser extends CordovaPlugin {
                 Log.d("ChildBrowser", "This should never happen");
             }
         }
+        
+        
     }
 }
