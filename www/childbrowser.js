@@ -95,7 +95,7 @@ ChildBrowser.prototype.openExternal = function(url, usePhoneGap) {
             cordova.exec(null, null, "ChildBrowser", "openExternal", [url, usePhoneGap]);
         }
     } else {
-        ChildBrowser.showWebPage(url);
+        window.plugins.ChildBrowser.showWebPage(url);
     };
 };
 

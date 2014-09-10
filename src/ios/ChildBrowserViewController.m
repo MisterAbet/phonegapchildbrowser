@@ -210,7 +210,12 @@ NSString* urlEncode(NSString* s) {
         NSMutableArray *parts = [NSMutableArray array];
         for (id key in data) {
             id value = [data objectForKey: key];
-            NSString *part = [NSString stringWithFormat: @"%@=%@", urlEncode(key), urlEncode(value)];
+            NSString* valueS=nil;
+            if([value isKindOfClass:[NSString class]])
+                valueS=value;
+            else if([value isKindOfClass:[NSNumber class]])
+                valueS= [value stringValue];
+            NSString *part = [NSString stringWithFormat: @"%@=%@", urlEncode(key), urlEncode(valueS)];
             [parts addObject: part];
         }
         NSString *myRequestString =  [parts componentsJoinedByString: @"&"];

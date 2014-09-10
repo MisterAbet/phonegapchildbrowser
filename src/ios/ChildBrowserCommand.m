@@ -49,7 +49,7 @@
     if([options objectForKey:@"request"]!=nil) {
         NSDictionary* request=[options objectForKey:@"request"];
         if([request objectForKey:@"method"]!=nil)
-            requestMethd=[[request objectForKey:@"method"] stringValue];
+            requestMethd=[request objectForKey:@"method"];
 
         if([request objectForKey:@"data"]!=nil)
             requestData=[request objectForKey:@"data"];
