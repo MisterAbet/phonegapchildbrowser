@@ -55,7 +55,11 @@
     }
 	
 	self.scaleEnabled = enabled;
-	
+    self.view.backgroundColor=[UIColor whiteColor];
+    CGRect frame=self.view.frame;
+    frame.origin.y += 20;
+    frame.size.height -= 20;
+    self.webView.frame=frame;
 	return self;	
 }
 
