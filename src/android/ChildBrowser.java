@@ -134,7 +134,7 @@ public class ChildBrowser extends CordovaPlugin {
         try {
             Intent intent = null;
             if (usePhoneGap) {
-                intent = new Intent().setClass((Context) cordova.getActivity(), org.apache.cordova.DroidGap.class);
+                intent = new Intent().setClass((Context) cordova.getActivity(), org.apache.cordova.CordovaActivity.class);
                 intent.setData(Uri.parse(url)); // This line will be removed in future.
                 intent.putExtra("url", url);
 
